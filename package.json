@@ -1,5 +1,4 @@
 {
-  // TODO: Modify your own project name & details
   "name": "launchpad-smart-contract",
   "version": "0.0.1",
   "description": "Seedify's Launchpad Smart Contract",
@@ -32,7 +31,7 @@
     "@nomiclabs/hardhat-ethers": "^2.0.6",
     "@nomiclabs/hardhat-etherscan": "^3.1.0",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
-    "@openzeppelin/contracts": "^4.7.0",
+    "@openzeppelin/contracts": "^3.4.1",
     "@typechain/ethers-v5": "^10.1.0",
     "@typechain/hardhat": "^6.1.2",
     "@types/chai": "^4.2.18",
@@ -67,6 +66,6 @@
     "yarn-upgrade-all": "^0.7.1"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.7.0"
+    "@openzeppelin/contracts": "^3.4.1"
   }
 }

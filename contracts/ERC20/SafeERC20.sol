@@ -1,6 +1,9 @@
 pragma solidity ^0.6.0;
 
 // SPDX-License-Identifier: UNLICENSED
+
+import "./IERC20.sol";
+
 library SafeERC20 {
     function safeTransfer(
         IERC20 token,

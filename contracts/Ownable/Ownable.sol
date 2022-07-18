@@ -1,8 +1,8 @@
-pragma solidity ^0.6.0;
+pragma solidity 0.6.12;
 
 // SPDX-License-Identifier: UNLICENSED
 
-import "../Context.sol";
+import "./Context.sol";
 
 //OWnABLE contract that define owning functionality
 contract Ownable {

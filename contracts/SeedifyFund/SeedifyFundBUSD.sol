@@ -3,7 +3,7 @@
 *Decentralized Incubator
 *A disruptive blockchain incubator program / decentralized seed stage fund, empowered through DAO based community-involvement mechanisms
 */
-pragma solidity ^0.6.0;
+pragma solidity 0.6.12;
 
 // SPDX-License-Identifier: UNLICENSED
 
