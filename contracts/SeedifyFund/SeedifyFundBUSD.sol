@@ -1,8 +1,8 @@
 /*
-*Seedify.fund
-*Decentralized Incubator
-*A disruptive blockchain incubator program / decentralized seed stage fund, empowered through DAO based community-involvement mechanisms
-*/
+ *Seedify.fund
+ *Decentralized Incubator
+ *A disruptive blockchain incubator program / decentralized seed stage fund, empowered through DAO based community-involvement mechanisms
+ */
 pragma solidity 0.6.12;
 
 // SPDX-License-Identifier: UNLICENSED
@@ -12,9 +12,9 @@ import "../Ownable/Context.sol";
 import "../Ownable/Ownable.sol";
 import "../ERC20/SafeERC20.sol";
 
-//SeedifyFundsContract
+//SeedifyFundBUSD
 
-contract SeedifyFundsContract is Ownable {
+contract SeedifyFundBUSD is Ownable {
     using SafeERC20 for IERC20;
 
     //token attributes
@@ -162,7 +162,7 @@ contract SeedifyFundsContract is Ownable {
         minAllocaPerUserTierSeven = 70000000000000;
         minAllocaPerUserTierEight = 80000000000000;
         minAllocaPerUserTierNine = 90000000000000;
-        
+
         totalUserInTierOne = 2;
         totalUserInTierTwo = 2;
         totalUserInTierThree = 2;
@@ -172,7 +172,7 @@ contract SeedifyFundsContract is Ownable {
         totalUserInTierSeven = 2;
         totalUserInTierEight = 2;
         totalUserInTierNine = 2;
-        
+
         maxAllocaPerUserTierOne = tierOneMaxCap / totalUserInTierOne;
         maxAllocaPerUserTierTwo = tierTwoMaxCap / totalUserInTierTwo;
         maxAllocaPerUserTierThree = tierThreeMaxCap / totalUserInTierThree;
