@@ -8,12 +8,13 @@ pragma solidity 0.6.12;
 // SPDX-License-Identifier: UNLICENSED
 
 import "../Ownable/Ownable.sol";
+import "../dependencies/ReentrancyGuard.sol";
 
 //SeedifyFundBNB
 
-contract SeedifyFundBNB is Ownable {
+contract SeedifyFundBNB is Ownable, ReentrancyGuard {
     //token attributes
-    string public constant NAME = "Seedify.funds"; //name of the contract
+    string public constant NAME = "Seedify.funds.BNB"; //name of the contract
     uint public immutable maxCap; // Max cap in BNB
     uint256 public immutable saleStartTime; // start sale time
     uint256 public immutable saleEndTime; // end sale time
@@ -28,7 +29,7 @@ contract SeedifyFundBNB is Ownable {
     uint256 public totalBnbInTierEight; // total bnb for tier Eight
     uint256 public totalBnbInTierNine; // total bnb for tier Nine
     uint public totalparticipants; // total participants in ido
-    address payable public projectOwner; // project Owner
+    address payable public immutable projectOwner; // project Owner
 
     // max cap per tier
     uint public tierOneMaxCap;
@@ -455,7 +456,7 @@ contract SeedifyFundBNB is Ownable {
     }
 
     // send bnb to the contract address
-    receive() external payable {
+    receive() external payable nonReentrant {
         require(now >= saleStartTime, "The sale is not started yet "); // solhint-disable
         require(now <= saleEndTime, "The sale is closed"); // solhint-disable
         require(

@@ -11,14 +11,15 @@ import "../ERC20/IERC20.sol";
 import "../Ownable/Context.sol";
 import "../Ownable/Ownable.sol";
 import "../ERC20/SafeERC20.sol";
+import "../dependencies/ReentrancyGuard.sol";
 
 //SeedifyFundBUSD
 
-contract SeedifyFundBUSD is Ownable {
+contract SeedifyFundBUSD is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     //token attributes
-    string public constant NAME = "Seedify.funds"; //name of the contract
+    string public constant NAME = "Seedify.funds.BUSD"; //name of the contract
     uint256 public immutable maxCap; // Max cap in BUSD
     uint256 public immutable saleStartTime; // start sale time
     uint256 public immutable saleEndTime; // end sale time
@@ -33,7 +34,7 @@ contract SeedifyFundBUSD is Ownable {
     uint256 public totalBUSDInTierEight; // total BUSD for tier Eight
     uint256 public totalBUSDInTierNine; // total BUSD for tier Nine
     uint256 public totalparticipants; // total participants in ido
-    address payable public projectOwner; // project Owner
+    address payable public immutable projectOwner; // project Owner
 
     // max cap per tier
     uint256 public tierOneMaxCap;
@@ -106,8 +107,8 @@ contract SeedifyFundBUSD is Ownable {
     // address array for tier three whitelist
     address[] private whitelistTierNine;
 
-    IERC20 public ERC20Interface;
-    address public tokenAddress;
+    IERC20 public immutable ERC20Interface;
+    address public immutable tokenAddress;
 
     //mapping the user purchase per tier
     mapping(address => uint256) public buyInOneTier;
@@ -185,7 +186,7 @@ contract SeedifyFundBUSD is Ownable {
         totalparticipants = _totalparticipants;
         require(_tokenAddress != address(0), "Zero token address"); //Adding token to the contract
         tokenAddress = _tokenAddress;
-        ERC20Interface = IERC20(tokenAddress);
+        ERC20Interface = IERC20(_tokenAddress);
     }
 
     // function to update the tiers value manually
@@ -436,6 +437,7 @@ contract SeedifyFundBUSD is Ownable {
     function buyTokens(uint256 amount)
         external
         _hasAllowance(msg.sender, amount)
+        nonReentrant
         returns (bool)
     {
         require(now >= saleStartTime, "The sale is not started yet "); // solhint-disable
