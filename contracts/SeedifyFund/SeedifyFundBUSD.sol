@@ -108,7 +108,7 @@ contract SeedifyFundBUSD is Ownable, ReentrancyGuard {
     address[] private whitelistTierNine;
 
     IERC20 public immutable ERC20Interface;
-    address public immutable tokenAddress;
+    // address public immutable tokenAddress;
 
     //mapping the user purchase per tier
     mapping(address => uint256) public buyInOneTier;
@@ -185,7 +185,7 @@ contract SeedifyFundBUSD is Ownable, ReentrancyGuard {
         maxAllocaPerUserTierNine = tierNineMaxCap / totalUserInTierNine;
         totalparticipants = _totalparticipants;
         require(_tokenAddress != address(0), "Zero token address"); //Adding token to the contract
-        tokenAddress = _tokenAddress;
+        // tokenAddress = _tokenAddress;
         ERC20Interface = IERC20(_tokenAddress);
     }
 
@@ -440,167 +440,208 @@ contract SeedifyFundBUSD is Ownable, ReentrancyGuard {
         nonReentrant
         returns (bool)
     {
-        require(now >= saleStartTime, "The sale is not started yet "); // solhint-disable
-        require(now <= saleEndTime, "The sale is closed"); // solhint-disable
+        require(
+            now >= saleStartTime && now <= saleEndTime,
+            "buyTokens: The sale is either not yet started or is closed now"
+        );
         require(
             totalBUSDReceivedInAllTier + amount <= maxCap,
             "buyTokens: purchase would exceed max cap"
         );
 
+        uint256 _amountBoughtUser = 0;
+        uint256 _totalBUSDinTier;
+        address _projOwner = projectOwner;
+
         if (getWhitelistOne(msg.sender)) {
-            buyInOneTier[msg.sender] += amount;
+            // read the amount bought by user
+            _amountBoughtUser = buyInOneTier[msg.sender];
+            _totalBUSDinTier = totalBUSDInTierOne;
             require(
-                buyInOneTier[msg.sender] >= minAllocaPerUserTierOne,
+                _amountBoughtUser >= minAllocaPerUserTierOne,
                 "your purchasing Power is so Low"
             );
             require(
-                totalBUSDInTierOne + amount <= tierOneMaxCap,
+                _totalBUSDinTier + amount <= tierOneMaxCap,
                 "buyTokens: purchase would exceed Tier one max cap"
             );
             require(
-                buyInOneTier[msg.sender] <= maxAllocaPerUserTierOne,
+                _amountBoughtUser <= maxAllocaPerUserTierOne,
                 "buyTokens:You are investing more than your tier-1 limit!"
             );
 
+            buyInOneTier[msg.sender] += amount;
             totalBUSDReceivedInAllTier += amount;
             totalBUSDInTierOne += amount;
-            ERC20Interface.safeTransferFrom(msg.sender, projectOwner, amount); //changes to transfer BUSD to owner
+            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
         } else if (getWhitelistTwo(msg.sender)) {
-            buyInTwoTier[msg.sender] += amount;
+            // read the amount bought by user
+            _amountBoughtUser = buyInTwoTier[msg.sender];
+            _totalBUSDinTier = totalBUSDInTierTwo;
             require(
-                buyInTwoTier[msg.sender] >= minAllocaPerUserTierTwo,
+                _amountBoughtUser >= minAllocaPerUserTierTwo,
                 "your purchasing Power is so Low"
             );
             require(
-                totalBUSDInTierTwo + amount <= tierTwoMaxCap,
+                _totalBUSDinTier + amount <= tierTwoMaxCap,
                 "buyTokens: purchase would exceed Tier two max cap"
             );
             require(
-                buyInTwoTier[msg.sender] <= maxAllocaPerUserTierTwo,
+                _amountBoughtUser <= maxAllocaPerUserTierTwo,
                 "buyTokens:You are investing more than your tier-2 limit!"
             );
+
+            buyInTwoTier[msg.sender] += amount;
             totalBUSDReceivedInAllTier += amount;
             totalBUSDInTierTwo += amount;
-            ERC20Interface.safeTransferFrom(msg.sender, projectOwner, amount); //changes to transfer BUSD to owner
+            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
         } else if (getWhitelistThree(msg.sender)) {
-            buyInThreeTier[msg.sender] += amount;
+            // read the amount bought by user
+            _amountBoughtUser = buyInThreeTier[msg.sender];
+            _totalBUSDinTier = totalBUSDInTierThree;
             require(
-                buyInThreeTier[msg.sender] >= minAllocaPerUserTierThree,
+                _amountBoughtUser >= minAllocaPerUserTierThree,
                 "your purchasing Power is so Low"
             );
             require(
-                buyInThreeTier[msg.sender] <= maxAllocaPerUserTierThree,
-                "buyTokens:You are investing more than your tier-3 limit!"
-            );
-            require(
-                totalBUSDInTierThree + amount <= tierThreeMaxCap,
+                _totalBUSDinTier + amount <= tierThreeMaxCap,
                 "buyTokens: purchase would exceed Tier three max cap"
             );
+            require(
+                _amountBoughtUser <= maxAllocaPerUserTierThree,
+                "buyTokens:You are investing more than your tier-3 limit!"
+            );
+
+            buyInThreeTier[msg.sender] += amount;
             totalBUSDReceivedInAllTier += amount;
             totalBUSDInTierThree += amount;
-            ERC20Interface.safeTransferFrom(msg.sender, projectOwner, amount); //changes to transfer BUSD to owner
+            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
         } else if (getWhitelistFour(msg.sender)) {
-            buyInFourTier[msg.sender] += amount;
+            // read the amount bought by user
+            _amountBoughtUser = buyInFourTier[msg.sender];
+            _totalBUSDinTier = totalBUSDInTierFour;
             require(
-                buyInFourTier[msg.sender] >= minAllocaPerUserTierFour,
+                _amountBoughtUser >= minAllocaPerUserTierFour,
                 "your purchasing Power is so Low"
             );
             require(
-                totalBUSDInTierFour + amount <= tierFourMaxCap,
-                "buyTokens: purchase would exceed Tier Four max cap"
+                _totalBUSDinTier + amount <= tierFourMaxCap,
+                "buyTokens: purchase would exceed Tier four max cap"
             );
             require(
-                buyInFourTier[msg.sender] <= maxAllocaPerUserTierFour,
+                _amountBoughtUser <= maxAllocaPerUserTierFour,
                 "buyTokens:You are investing more than your tier-4 limit!"
             );
+
+            buyInFourTier[msg.sender] += amount;
             totalBUSDReceivedInAllTier += amount;
             totalBUSDInTierFour += amount;
-            ERC20Interface.safeTransferFrom(msg.sender, projectOwner, amount); //changes to transfer BUSD to owner
+            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
         } else if (getWhitelistFive(msg.sender)) {
-            buyInFiveTier[msg.sender] += amount;
+            // read the amount bought by user
+            _amountBoughtUser = buyInFiveTier[msg.sender];
+            _totalBUSDinTier = totalBUSDInTierFive;
             require(
-                buyInFiveTier[msg.sender] >= minAllocaPerUserTierFive,
+                _amountBoughtUser >= minAllocaPerUserTierFive,
                 "your purchasing Power is so Low"
             );
             require(
-                totalBUSDInTierFive + amount <= tierFiveMaxCap,
-                "buyTokens: purchase would exceed Tier Five max cap"
+                _totalBUSDinTier + amount <= tierFiveMaxCap,
+                "buyTokens: purchase would exceed Tier five max cap"
             );
             require(
-                buyInFiveTier[msg.sender] <= maxAllocaPerUserTierFive,
+                _amountBoughtUser <= maxAllocaPerUserTierFive,
                 "buyTokens:You are investing more than your tier-5 limit!"
             );
+
+            buyInFiveTier[msg.sender] += amount;
             totalBUSDReceivedInAllTier += amount;
             totalBUSDInTierFive += amount;
-            ERC20Interface.safeTransferFrom(msg.sender, projectOwner, amount); //changes to transfer BUSD to owner
+            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
         } else if (getWhitelistSix(msg.sender)) {
-            buyInSixTier[msg.sender] += amount;
+            // read the amount bought by user
+            _amountBoughtUser = buyInSixTier[msg.sender];
+            _totalBUSDinTier = totalBUSDInTierSix;
             require(
-                buyInSixTier[msg.sender] >= minAllocaPerUserTierSix,
+                _amountBoughtUser >= minAllocaPerUserTierSix,
                 "your purchasing Power is so Low"
             );
             require(
-                totalBUSDInTierSix + amount <= tierSixMaxCap,
-                "buyTokens: purchase would exceed Tier Six max cap"
+                _totalBUSDinTier + amount <= tierSixMaxCap,
+                "buyTokens: purchase would exceed Tier six max cap"
             );
             require(
-                buyInSixTier[msg.sender] <= maxAllocaPerUserTierSix,
+                _amountBoughtUser <= maxAllocaPerUserTierSix,
                 "buyTokens:You are investing more than your tier-6 limit!"
             );
+
+            buyInSixTier[msg.sender] += amount;
             totalBUSDReceivedInAllTier += amount;
             totalBUSDInTierSix += amount;
-            ERC20Interface.safeTransferFrom(msg.sender, projectOwner, amount); //changes to transfer BUSD to owner
+            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
         } else if (getWhitelistSeven(msg.sender)) {
-            buyInSevenTier[msg.sender] += amount;
+            // read the amount bought by user
+            _amountBoughtUser = buyInSevenTier[msg.sender];
+            _totalBUSDinTier = totalBUSDInTierSeven;
             require(
-                buyInSevenTier[msg.sender] >= minAllocaPerUserTierSeven,
+                _amountBoughtUser >= minAllocaPerUserTierSeven,
                 "your purchasing Power is so Low"
             );
             require(
-                totalBUSDInTierSeven + amount <= tierSevenMaxCap,
-                "buyTokens: purchase would exceed Tier Seven max cap"
+                _totalBUSDinTier + amount <= tierSevenMaxCap,
+                "buyTokens: purchase would exceed Tier seven max cap"
             );
             require(
-                buyInSevenTier[msg.sender] <= maxAllocaPerUserTierSeven,
+                _amountBoughtUser <= maxAllocaPerUserTierSeven,
                 "buyTokens:You are investing more than your tier-7 limit!"
             );
+
+            buyInSevenTier[msg.sender] += amount;
             totalBUSDReceivedInAllTier += amount;
             totalBUSDInTierSeven += amount;
-            ERC20Interface.safeTransferFrom(msg.sender, projectOwner, amount); //changes to transfer BUSD to owner
+            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
         } else if (getWhitelistEight(msg.sender)) {
-            buyInEightTier[msg.sender] += amount;
+            // read the amount bought by user
+            _amountBoughtUser = buyInEightTier[msg.sender];
+            _totalBUSDinTier = totalBUSDInTierEight;
             require(
-                buyInEightTier[msg.sender] >= minAllocaPerUserTierEight,
+                _amountBoughtUser >= minAllocaPerUserTierEight,
                 "your purchasing Power is so Low"
             );
             require(
-                totalBUSDInTierEight + amount <= tierEightMaxCap,
-                "buyTokens: purchase would exceed Tier Eight max cap"
+                _totalBUSDinTier + amount <= tierEightMaxCap,
+                "buyTokens: purchase would exceed Tier eight max cap"
             );
             require(
-                buyInEightTier[msg.sender] <= maxAllocaPerUserTierEight,
+                _amountBoughtUser <= maxAllocaPerUserTierEight,
                 "buyTokens:You are investing more than your tier-8 limit!"
             );
+
+            buyInEightTier[msg.sender] += amount;
             totalBUSDReceivedInAllTier += amount;
             totalBUSDInTierEight += amount;
-            ERC20Interface.safeTransferFrom(msg.sender, projectOwner, amount); //changes to transfer BUSD to owner
+            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
         } else if (getWhitelistNine(msg.sender)) {
-            buyInNineTier[msg.sender] += amount;
+            // read the amount bought by user
+            _amountBoughtUser = buyInNineTier[msg.sender];
+            _totalBUSDinTier = totalBUSDInTierNine;
             require(
-                buyInNineTier[msg.sender] >= minAllocaPerUserTierNine,
+                _amountBoughtUser >= minAllocaPerUserTierNine,
                 "your purchasing Power is so Low"
             );
             require(
-                totalBUSDInTierNine + amount <= tierNineMaxCap,
-                "buyTokens: purchase would exceed Tier Nine max cap"
+                _totalBUSDinTier + amount <= tierNineMaxCap,
+                "buyTokens: purchase would exceed Tier nine max cap"
             );
             require(
-                buyInNineTier[msg.sender] <= maxAllocaPerUserTierNine,
+                _amountBoughtUser <= maxAllocaPerUserTierNine,
                 "buyTokens:You are investing more than your tier-9 limit!"
             );
+
+            buyInNineTier[msg.sender] += amount;
             totalBUSDReceivedInAllTier += amount;
             totalBUSDInTierNine += amount;
-            ERC20Interface.safeTransferFrom(msg.sender, projectOwner, amount); //changes to transfer BUSD to owner
+            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
         } else {
             revert("Not whitelisted");
         }
