@@ -121,6 +121,49 @@ contract SeedifyFundBUSD is Ownable, ReentrancyGuard {
     mapping(address => uint256) public buyInEightTier;
     mapping(address => uint256) public buyInNineTier;
 
+    // NOTE: Here, this `struct` could be used like `mapping(address => RefundVault[]) refundInTier1`
+    // But, then the `claimRefund` function would be costly as array costs more than mapping in terms of gas during iteration.
+    // So, it's dropped as of now.
+    // struct RefundVault {
+    //     uint256 buyAmount;
+    //     uint256 buyTimestamp;
+    // }
+
+    uint32 private constant refundDuration = 86400; // 24hr
+    uint32 private listingTimestamp;
+
+    // buyer -> tier -> timestamp -> amount
+    // mapping(address => mapping(uint256 => mapping(uint256 => uint256)))
+    //     private refundInTiers;
+    // mapping(address => mapping(uint256 => uint256)) private refundInTier2;
+    // mapping(address => mapping(uint256 => uint256)) private refundInTier3;
+    // mapping(address => mapping(uint256 => uint256)) private refundInTier4;
+    // mapping(address => mapping(uint256 => uint256)) private refundInTier5;
+    // mapping(address => mapping(uint256 => uint256)) private refundInTier6;
+    // mapping(address => mapping(uint256 => uint256)) private refundInTier7;
+    // mapping(address => mapping(uint256 => uint256)) private refundInTier8;
+    // mapping(address => mapping(uint256 => uint256)) private refundInTier9;
+
+    // buyer -> tier -> timestamp[]
+    // mapping(address => mapping(uint256 => uint256[]))
+    //     private refundTstampsInTiers;
+    // mapping(address => uint256[]) private refundTstampsInTier2;
+    // mapping(address => uint256[]) private refundTstampsInTier3;
+    // mapping(address => uint256[]) private refundTstampsInTier4;
+    // mapping(address => uint256[]) private refundTstampsInTier5;
+    // mapping(address => uint256[]) private refundTstampsInTier6;
+    // mapping(address => uint256[]) private refundTstampsInTier7;
+    // mapping(address => uint256[]) private refundTstampsInTier8;
+    // mapping(address => uint256[]) private refundTstampsInTier9;
+
+    // EVENTS
+    // TODO: add `TokenBought`
+    event RefundClaimed(
+        address indexed buyer,
+        uint256 indexed tier,
+        uint256 claimAmt
+    );
+
     // CONSTRUCTOR
     constructor(
         uint256 _maxCap,
@@ -137,7 +180,8 @@ contract SeedifyFundBUSD is Ownable, ReentrancyGuard {
         uint256 _tierEightValue,
         uint256 _tierNineValue,
         uint256 _totalparticipants,
-        address _tokenAddress
+        address _tokenAddress,
+        uint32 _listingTimestamp
     ) public {
         maxCap = _maxCap;
         saleStartTime = _saleStartTime;
@@ -187,6 +231,7 @@ contract SeedifyFundBUSD is Ownable, ReentrancyGuard {
         require(_tokenAddress != address(0), "Zero token address"); //Adding token to the contract
         // tokenAddress = _tokenAddress;
         ERC20Interface = IERC20(_tokenAddress);
+        listingTimestamp = _listingTimestamp;
     }
 
     // function to update the tiers value manually
@@ -646,5 +691,38 @@ contract SeedifyFundBUSD is Ownable, ReentrancyGuard {
             revert("Not whitelisted");
         }
         return true;
+    }
+
+    function setListingTimestamp(uint32 _listingTstamp) external onlyOwner {
+        listingTimestamp = _listingTstamp;
+    }
+
+    function claimRefund(uint256 _amount) external nonReentrant returns (bool) {
+        require(
+            block.timestamp - listingTimestamp <= refundDuration,
+            "claimRefund: time limit exceeded"
+        );
+
+        if (getWhitelistOne(msg.sender)) {
+            uint256 _boughtAmt = buyInOneTier[msg.sender];
+            require(_amount <= _boughtAmt, "claim amount is more than bought");
+            if (_boughtAmt > 0) {
+                // reduce the bought balance of caller
+                buyInOneTier[msg.sender] -= _amount;
+                // reduce the total bought balance in all tiers
+                totalBUSDReceivedInAllTier -= _amount;
+                // reduce the total bought balance in this tier
+                totalBUSDInTierOne -= _amount;
+                // refund claimed event fired
+                emit RefundClaimed(msg.sender, 1, _amount);
+                // refund the bought amount
+                ERC20Interface.safeTransfer(msg.sender, _amount);
+
+                return true;
+            }
+        }
+        // TODO: put the same condition for other 8 tiers
+
+        return false;
     }
 }
