@@ -7,6 +7,23 @@ Seedify.fund Launchpad Smart Contract on Binance Smart Chain
 - Payment using 2 tokens:
   - BNB
   - BUSD
+- There are 9 tiers and for each tier these state variables are stored:
+
+  - total amount invested (in BUSD/BNB)
+  - max. Cap amount (in BUSD/BNB)
+  - total no. of users
+  - max. allocation per user
+  - min. allocation per user
+  - list of whitelisted user
+  - bought amount per user
+
+- Other than these, the following are the state variables maintained:
+  - total BUSD/BNB invested in all tiers
+  - total max. cap in BUSD/BNB
+  - sale start time
+  - sale end time
+  - project owner
+  - ERC20 token (BUSD/BNB) interface
 
 ## Pre-requisite
 

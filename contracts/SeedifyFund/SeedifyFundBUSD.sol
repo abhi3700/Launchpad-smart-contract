@@ -170,15 +170,15 @@ contract SeedifyFundBUSD is Ownable, ReentrancyGuard {
         uint256 _saleStartTime,
         uint256 _saleEndTime,
         address payable _projectOwner,
-        uint256 _tierOneValue,
-        uint256 _tierTwoValue,
-        uint256 _tierThreeValue,
-        uint256 _tierFourValue,
-        uint256 _tierFiveValue,
-        uint256 _tierSixValue,
-        uint256 _tierSevenValue,
-        uint256 _tierEightValue,
-        uint256 _tierNineValue,
+        uint256 _tier1Value,
+        uint256 _tier2Value,
+        uint256 _tier3Value,
+        uint256 _tier4Value,
+        uint256 _tier5Value,
+        uint256 _tier6Value,
+        uint256 _tier7Value,
+        uint256 _tier8Value,
+        uint256 _tier9Value,
         uint256 _totalparticipants,
         address _tokenAddress,
         uint32 _listingTimestamp
@@ -188,15 +188,15 @@ contract SeedifyFundBUSD is Ownable, ReentrancyGuard {
         saleEndTime = _saleEndTime;
 
         projectOwner = _projectOwner;
-        tierMaxCap1 = _tierOneValue;
-        tierMaxCap2 = _tierTwoValue;
-        tierMaxCap3 = _tierThreeValue;
-        tierMaxCap4 = _tierFourValue;
-        tierMaxCap5 = _tierFiveValue;
-        tierMaxCap6 = _tierSixValue;
-        tierMaxCap7 = _tierSevenValue;
-        tierMaxCap8 = _tierEightValue;
-        tierMaxCap9 = _tierNineValue;
+        tierMaxCap1 = _tier1Value;
+        tierMaxCap2 = _tier2Value;
+        tierMaxCap3 = _tier3Value;
+        tierMaxCap4 = _tier4Value;
+        tierMaxCap5 = _tier5Value;
+        tierMaxCap6 = _tier6Value;
+        tierMaxCap7 = _tier7Value;
+        tierMaxCap8 = _tier8Value;
+        tierMaxCap9 = _tier9Value;
 
         minAllocaPerUserTier1 = 10000000000000;
         minAllocaPerUserTier2 = 20000000000000;
@@ -236,25 +236,25 @@ contract SeedifyFundBUSD is Ownable, ReentrancyGuard {
 
     // function to update the tiers value manually
     function updateTierValues(
-        uint256 _tierOneValue,
-        uint256 _tierTwoValue,
-        uint256 _tierThreeValue,
-        uint256 _tierFourValue,
-        uint256 _tierFiveValue,
-        uint256 _tierSixValue,
-        uint256 _tierSevenValue,
-        uint256 _tierEightValue,
-        uint256 _tierNineValue
+        uint256 _tier1Value,
+        uint256 _tier2Value,
+        uint256 _tier3Value,
+        uint256 _tier4Value,
+        uint256 _tier5Value,
+        uint256 _tier6Value,
+        uint256 _tier7Value,
+        uint256 _tier8Value,
+        uint256 _tier9Value
     ) external onlyOwner {
-        tierMaxCap1 = _tierOneValue;
-        tierMaxCap2 = _tierTwoValue;
-        tierMaxCap3 = _tierThreeValue;
-        tierMaxCap4 = _tierFourValue;
-        tierMaxCap5 = _tierFiveValue;
-        tierMaxCap6 = _tierSixValue;
-        tierMaxCap7 = _tierSevenValue;
-        tierMaxCap8 = _tierEightValue;
-        tierMaxCap9 = _tierNineValue;
+        tierMaxCap1 = _tier1Value;
+        tierMaxCap2 = _tier2Value;
+        tierMaxCap3 = _tier3Value;
+        tierMaxCap4 = _tier4Value;
+        tierMaxCap5 = _tier5Value;
+        tierMaxCap6 = _tier6Value;
+        tierMaxCap7 = _tier7Value;
+        tierMaxCap8 = _tier8Value;
+        tierMaxCap9 = _tier9Value;
 
         maxAllocaPerUserTier1 = tierMaxCap1 / totalUserInTier1;
         maxAllocaPerUserTier2 = tierMaxCap2 / totalUserInTier2;
