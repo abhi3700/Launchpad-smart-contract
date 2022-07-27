@@ -4,4 +4,3 @@ artifacts
 cache
 coverage*
 gasReporterOutput.json
-instruction.md
