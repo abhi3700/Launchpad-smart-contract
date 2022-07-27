@@ -6,20 +6,6 @@ import { resolve } from "path";
 
 async function main(): Promise<void> {
   // ==============================================================================
-  // We get the SeedifyFund BNB contract to deploy
-  const seedifyFundBNBFactory: ContractFactory =
-    await ethers.getContractFactory("SeedifyFundBNB");
-  const seedifyFundBNBContract: Contract = await seedifyFundBNBFactory.deploy();
-  await seedifyFundBNBContract.deployed();
-  console.log(
-    "Seedify Fund SC for BNB Token deployed to: ",
-    seedifyFundBNBContract.address
-  );
-  console.log(
-    `The transaction that was sent to the network to deploy the Seedify Fund SC BNB: ${seedifyFundBNBContract.deployTransaction.hash}`
-  );
-
-  // ==============================================================================
   // We get the SeedifyFund BUSD contract to deploy
   const seedifyFundBUSDFactory: ContractFactory =
     await ethers.getContractFactory("SeedifyFundBUSD");
@@ -28,11 +14,11 @@ async function main(): Promise<void> {
   // TODO: parse arguments
   await seedifyFundBUSDContract.deployed();
   console.log(
-    "Seedify Fund SC for BNB Token deployed to: ",
+    "Seedify Fund SC for BUSD Token deployed to: ",
     seedifyFundBUSDContract.address
   );
   console.log(
-    `The transaction that was sent to the network to deploy the Seedify Fund SC BNB: ${seedifyFundBUSDContract.deployTransaction.hash}`
+    `The transaction that was sent to the network to deploy the Seedify Fund SC BUSD: ${seedifyFundBUSDContract.deployTransaction.hash}`
   );
 }
 
