@@ -5,7 +5,7 @@
  */
 pragma solidity 0.6.12;
 
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 
 import "../ERC20/IERC20.sol";
 import "../Ownable/Ownable.sol";
@@ -14,7 +14,6 @@ import "../ERC20/SafeERC20.sol";
 import "../dependencies/ReentrancyGuard.sol";
 
 //SeedifyFundBUSD
-
 contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
@@ -23,7 +22,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
     uint256 public immutable maxCap; // Max cap in BUSD
     uint256 public immutable saleStartTime; // start sale time
     uint256 public immutable saleEndTime; // end sale time
-    uint256 public totalBUSDReceivedInAllTier; // total bnd received
+    uint256 public totalBUSDReceivedInAllTiers; // total bnd received
     // tier -> total_amount
     mapping(uint256 => uint256) public totalBUSDInTiers;
     uint256 public totalparticipants; // total participants in ido
@@ -67,19 +66,25 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
     uint32 private constant refundDuration = 86400; // 24hr
     uint32 private listingTimestamp;
 
-    // buyer -> tier -> timestamp -> amount
-    mapping(address => mapping(uint256 => mapping(uint256 => uint256)))
-        private refundInTiers;
+    // refund amount per user in each tier
+    // buyer -> tier -> refund_amount
+    mapping(address => mapping(uint256 => uint256)) private refundinTiers;
 
-    // buyer -> tier -> timestamp[]
-    mapping(address => mapping(uint256 => uint256[]))
-        private refundTstampsInTiers;
+    // total refund amount per user in all tiers
+    // buyer -> total_refund_amount
+    mapping(address => uint256) private refundinAllTiers;
+
+    // // buyer -> tier -> refund_timestamp[]
+    // NOTE: get it from event filtering
+    // mapping(address => mapping(uint256 => uint256[]))
+    //     private refundTstampsInTiers;
 
     // EVENTS
     // TODO: add `TokenBought`
     event RefundClaimed(
         address indexed buyer,
         uint256 indexed tier,
+        uint256 indexed refundTimestamp,
         uint256 claimAmt
     );
 
@@ -226,6 +231,8 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
         maxAllocaPerUserTiers[9] = tierMaxCaps[9] / _tier9UsersValue;
     }
 
+    // instead of having multiple functions for each tier.
+    // Now, parse the tier along with address
     function addWhitelist(address _address, uint256 _tier)
         external
         onlyOwner
@@ -235,6 +242,12 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
         whitelistTiers[_tier].push(_address);
     }
 
+    function setListingTimestamp(uint32 _listingTstamp) external onlyOwner {
+        listingTimestamp = _listingTstamp;
+    }
+
+    // instead of having multiple functions for each tier.
+    // Now, parse the tier along with address
     function getWhitelist(uint256 _tier, address _address)
         public
         view
@@ -271,7 +284,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             "buyTokens: The sale is either not yet started or is closed now"
         );
         require(
-            totalBUSDReceivedInAllTier + amount <= maxCap,
+            totalBUSDReceivedInAllTiers + amount <= maxCap,
             "buyTokens: purchase would exceed max cap"
         );
 
@@ -297,7 +310,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             );
 
             buyInTiers[msg.sender][1] += amount;
-            totalBUSDReceivedInAllTier += amount;
+            totalBUSDReceivedInAllTiers += amount;
             totalBUSDInTiers[1] += amount;
             ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
         } else if (getWhitelist(2, msg.sender)) {
@@ -318,7 +331,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             );
 
             buyInTiers[msg.sender][2] += amount;
-            totalBUSDReceivedInAllTier += amount;
+            totalBUSDReceivedInAllTiers += amount;
             totalBUSDInTiers[2] += amount;
             ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
         } else if (getWhitelist(3, msg.sender)) {
@@ -339,7 +352,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             );
 
             buyInTiers[msg.sender][3] += amount;
-            totalBUSDReceivedInAllTier += amount;
+            totalBUSDReceivedInAllTiers += amount;
             totalBUSDInTiers[3] += amount;
             ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
         } else if (getWhitelist(4, msg.sender)) {
@@ -360,7 +373,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             );
 
             buyInTiers[msg.sender][4] += amount;
-            totalBUSDReceivedInAllTier += amount;
+            totalBUSDReceivedInAllTiers += amount;
             totalBUSDInTiers[4] += amount;
             ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
         } else if (getWhitelist(5, msg.sender)) {
@@ -381,7 +394,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             );
 
             buyInTiers[msg.sender][5] += amount;
-            totalBUSDReceivedInAllTier += amount;
+            totalBUSDReceivedInAllTiers += amount;
             totalBUSDInTiers[5] += amount;
             ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
         } else if (getWhitelist(6, msg.sender)) {
@@ -402,7 +415,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             );
 
             buyInTiers[msg.sender][6] += amount;
-            totalBUSDReceivedInAllTier += amount;
+            totalBUSDReceivedInAllTiers += amount;
             totalBUSDInTiers[6] += amount;
             ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
         } else if (getWhitelist(7, msg.sender)) {
@@ -423,7 +436,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             );
 
             buyInTiers[msg.sender][7] += amount;
-            totalBUSDReceivedInAllTier += amount;
+            totalBUSDReceivedInAllTiers += amount;
             totalBUSDInTiers[7] += amount;
             ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
         } else if (getWhitelist(8, msg.sender)) {
@@ -444,7 +457,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             );
 
             buyInTiers[msg.sender][8] += amount;
-            totalBUSDReceivedInAllTier += amount;
+            totalBUSDReceivedInAllTiers += amount;
             totalBUSDInTiers[8] += amount;
             ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
         } else if (getWhitelist(9, msg.sender)) {
@@ -465,17 +478,13 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             );
 
             buyInTiers[msg.sender][9] += amount;
-            totalBUSDReceivedInAllTier += amount;
+            totalBUSDReceivedInAllTiers += amount;
             totalBUSDInTiers[9] += amount;
             ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
         } else {
             revert("Not whitelisted");
         }
         return true;
-    }
-
-    function setListingTimestamp(uint32 _listingTstamp) external onlyOwner {
-        listingTimestamp = _listingTstamp;
     }
 
     /* 
@@ -496,129 +505,236 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
 
         if (getWhitelist(1, msg.sender)) {
             uint256 _boughtAmt = buyInTiers[msg.sender][1];
+
             require(_boughtAmt > 0, "zero bought amount");
             require(_amount <= _boughtAmt, "claim amount is more than bought");
+
             // reduce the bought balance of caller
             buyInTiers[msg.sender][1] -= _amount;
+
             // reduce the total bought balance in all tiers
-            totalBUSDReceivedInAllTier -= _amount;
+            totalBUSDReceivedInAllTiers -= _amount;
+
             // reduce the total bought balance in this tier
             totalBUSDInTiers[1] -= _amount;
-            // TODO: add refund amount @repeat for each tier
+
+            // Add refund amount for claimer in each tier
+            refundinTiers[msg.sender][1] += _amount;
+
+            // Add refund amount for claimer in all tiers
+            refundinAllTiers[msg.sender] += _amount;
+
             // refund claimed event fired
-            emit RefundClaimed(msg.sender, 1, _amount);
+            emit RefundClaimed(msg.sender, 1, block.timestamp, _amount);
+
             // refund the bought amount
             ERC20Interface.safeTransfer(msg.sender, _amount);
         } else if (getWhitelist(2, msg.sender)) {
             uint256 _boughtAmt = buyInTiers[msg.sender][2];
+
             require(_boughtAmt > 0, "zero bought amount");
             require(_amount <= _boughtAmt, "claim amount is more than bought");
+
             // reduce the bought balance of caller
             buyInTiers[msg.sender][2] -= _amount;
+
             // reduce the total bought balance in all tiers
-            totalBUSDReceivedInAllTier -= _amount;
+            totalBUSDReceivedInAllTiers -= _amount;
+
             // reduce the total bought balance in this tier
             totalBUSDInTiers[2] -= _amount;
+
+            // Add refund amount for claimer in each tier
+            refundinTiers[msg.sender][2] += _amount;
+
+            // Add refund amount for claimer in all tiers
+            refundinAllTiers[msg.sender] += _amount;
+
             // refund claimed event fired
-            emit RefundClaimed(msg.sender, 2, _amount);
+            emit RefundClaimed(msg.sender, 2, block.timestamp, _amount);
+
             // refund the bought amount
             ERC20Interface.safeTransfer(msg.sender, _amount);
         } else if (getWhitelist(3, msg.sender)) {
             uint256 _boughtAmt = buyInTiers[msg.sender][3];
+
             require(_boughtAmt > 0, "zero bought amount");
             require(_amount <= _boughtAmt, "claim amount is more than bought");
+
             // reduce the bought balance of caller
             buyInTiers[msg.sender][3] -= _amount;
+
             // reduce the total bought balance in all tiers
-            totalBUSDReceivedInAllTier -= _amount;
+            totalBUSDReceivedInAllTiers -= _amount;
+
             // reduce the total bought balance in this tier
             totalBUSDInTiers[3] -= _amount;
+
+            // Add refund amount for claimer in each tier
+            refundinTiers[msg.sender][3] += _amount;
+
+            // Add refund amount for claimer in all tiers
+            refundinAllTiers[msg.sender] += _amount;
+
             // refund claimed event fired
-            emit RefundClaimed(msg.sender, 3, _amount);
+            emit RefundClaimed(msg.sender, 3, block.timestamp, _amount);
+
             // refund the bought amount
             ERC20Interface.safeTransfer(msg.sender, _amount);
         } else if (getWhitelist(4, msg.sender)) {
             uint256 _boughtAmt = buyInTiers[msg.sender][4];
+
             require(_boughtAmt > 0, "zero bought amount");
             require(_amount <= _boughtAmt, "claim amount is more than bought");
+
             // reduce the bought balance of caller
             buyInTiers[msg.sender][4] -= _amount;
+
             // reduce the total bought balance in all tiers
-            totalBUSDReceivedInAllTier -= _amount;
+            totalBUSDReceivedInAllTiers -= _amount;
+
             // reduce the total bought balance in this tier
             totalBUSDInTiers[4] -= _amount;
+
+            // Add refund amount for claimer in each tier
+            refundinTiers[msg.sender][4] += _amount;
+
+            // Add refund amount for claimer in all tiers
+            refundinAllTiers[msg.sender] += _amount;
+
             // refund claimed event fired
-            emit RefundClaimed(msg.sender, 4, _amount);
+            emit RefundClaimed(msg.sender, 4, block.timestamp, _amount);
+
             // refund the bought amount
             ERC20Interface.safeTransfer(msg.sender, _amount);
         } else if (getWhitelist(5, msg.sender)) {
             uint256 _boughtAmt = buyInTiers[msg.sender][5];
+
             require(_boughtAmt > 0, "zero bought amount");
             require(_amount <= _boughtAmt, "claim amount is more than bought");
+
             // reduce the bought balance of caller
             buyInTiers[msg.sender][5] -= _amount;
+
             // reduce the total bought balance in all tiers
-            totalBUSDReceivedInAllTier -= _amount;
+            totalBUSDReceivedInAllTiers -= _amount;
+
             // reduce the total bought balance in this tier
             totalBUSDInTiers[5] -= _amount;
+
+            // Add refund amount for claimer in each tier
+            refundinTiers[msg.sender][5] += _amount;
+
+            // Add refund amount for claimer in all tiers
+            refundinAllTiers[msg.sender] += _amount;
+
             // refund claimed event fired
-            emit RefundClaimed(msg.sender, 5, _amount);
+            emit RefundClaimed(msg.sender, 5, block.timestamp, _amount);
+
             // refund the bought amount
             ERC20Interface.safeTransfer(msg.sender, _amount);
         } else if (getWhitelist(6, msg.sender)) {
             uint256 _boughtAmt = buyInTiers[msg.sender][6];
+
             require(_boughtAmt > 0, "zero bought amount");
             require(_amount <= _boughtAmt, "claim amount is more than bought");
+
             // reduce the bought balance of caller
             buyInTiers[msg.sender][6] -= _amount;
+
             // reduce the total bought balance in all tiers
-            totalBUSDReceivedInAllTier -= _amount;
+            totalBUSDReceivedInAllTiers -= _amount;
+
             // reduce the total bought balance in this tier
             totalBUSDInTiers[6] -= _amount;
+
+            // Add refund amount for claimer in each tier
+            refundinTiers[msg.sender][6] += _amount;
+
+            // Add refund amount for claimer in all tiers
+            refundinAllTiers[msg.sender] += _amount;
+
             // refund claimed event fired
-            emit RefundClaimed(msg.sender, 6, _amount);
+            emit RefundClaimed(msg.sender, 6, block.timestamp, _amount);
+
             // refund the bought amount
             ERC20Interface.safeTransfer(msg.sender, _amount);
         } else if (getWhitelist(7, msg.sender)) {
             uint256 _boughtAmt = buyInTiers[msg.sender][7];
+
             require(_boughtAmt > 0, "zero bought amount");
             require(_amount <= _boughtAmt, "claim amount is more than bought");
+
             // reduce the bought balance of caller
             buyInTiers[msg.sender][7] -= _amount;
+
             // reduce the total bought balance in all tiers
-            totalBUSDReceivedInAllTier -= _amount;
+            totalBUSDReceivedInAllTiers -= _amount;
+
             // reduce the total bought balance in this tier
             totalBUSDInTiers[7] -= _amount;
+
+            // Add refund amount for claimer in each tier
+            refundinTiers[msg.sender][7] += _amount;
+
+            // Add refund amount for claimer in all tiers
+            refundinAllTiers[msg.sender] += _amount;
+
             // refund claimed event fired
-            emit RefundClaimed(msg.sender, 7, _amount);
+            emit RefundClaimed(msg.sender, 7, block.timestamp, _amount);
+
             // refund the bought amount
             ERC20Interface.safeTransfer(msg.sender, _amount);
         } else if (getWhitelist(8, msg.sender)) {
             uint256 _boughtAmt = buyInTiers[msg.sender][8];
+
             require(_boughtAmt > 0, "zero bought amount");
             require(_amount <= _boughtAmt, "claim amount is more than bought");
+
             // reduce the bought balance of caller
             buyInTiers[msg.sender][8] -= _amount;
+
             // reduce the total bought balance in all tiers
-            totalBUSDReceivedInAllTier -= _amount;
+            totalBUSDReceivedInAllTiers -= _amount;
+
             // reduce the total bought balance in this tier
             totalBUSDInTiers[8] -= _amount;
+
+            // Add refund amount for claimer in each tier
+            refundinTiers[msg.sender][8] += _amount;
+
+            // Add refund amount for claimer in all tiers
+            refundinAllTiers[msg.sender] += _amount;
+
             // refund claimed event fired
-            emit RefundClaimed(msg.sender, 8, _amount);
+            emit RefundClaimed(msg.sender, 8, block.timestamp, _amount);
+
             // refund the bought amount
             ERC20Interface.safeTransfer(msg.sender, _amount);
         } else if (getWhitelist(9, msg.sender)) {
             uint256 _boughtAmt = buyInTiers[msg.sender][9];
+
             require(_boughtAmt > 0, "zero bought amount");
             require(_amount <= _boughtAmt, "claim amount is more than bought");
+
             // reduce the bought balance of caller
             buyInTiers[msg.sender][9] -= _amount;
+
             // reduce the total bought balance in all tiers
-            totalBUSDReceivedInAllTier -= _amount;
+            totalBUSDReceivedInAllTiers -= _amount;
+
             // reduce the total bought balance in this tier
             totalBUSDInTiers[9] -= _amount;
+
+            // Add refund amount for claimer in each tier
+            refundinTiers[msg.sender][9] += _amount;
+
+            // Add refund amount for claimer in all tiers
+            refundinAllTiers[msg.sender] += _amount;
+
             // refund claimed event fired
-            emit RefundClaimed(msg.sender, 9, _amount);
+            emit RefundClaimed(msg.sender, 9, block.timestamp, _amount);
+
             // refund the bought amount
             ERC20Interface.safeTransfer(msg.sender, _amount);
         } else {
