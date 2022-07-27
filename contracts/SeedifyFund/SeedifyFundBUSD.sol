@@ -26,94 +26,28 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
     uint256 public totalBUSDReceivedInAllTier; // total bnd received
     // tier -> total_amount
     mapping(uint256 => uint256) public totalBUSDInTiers;
-    // uint256 public totalBUSDInTier2; // total BUSD for tier Two
-    // uint256 public totalBUSDInTier3; // total BUSD for tier Three
-    // uint256 public totalBUSDInTier4; // total BUSD for tier Four
-    // uint256 public totalBUSDInTier5; // total BUSD for tier Five
-    // uint256 public totalBUSDInTier6; // total BUSD for tier Six
-    // uint256 public totalBUSDInTier7; // total BUSD for tier Seven
-    // uint256 public totalBUSDInTier8; // total BUSD for tier Eight
-    // uint256 public totalBUSDInTier9; // total BUSD for tier Nine
     uint256 public totalparticipants; // total participants in ido
     address payable public immutable projectOwner; // project Owner
 
     // max cap per tier
     // tier -> max_cap
     mapping(uint256 => uint256) public tierMaxCaps;
-    // uint256 public tierMaxCap2;
-    // uint256 public tierMaxCap3;
-    // uint256 public tierMaxCap4;
-    // uint256 public tierMaxCap5;
-    // uint256 public tierMaxCap6;
-    // uint256 public tierMaxCap7;
-    // uint256 public tierMaxCap8;
-    // uint256 public tierMaxCap9;
 
     //total users per tier
     // tier -> total_user_count
     mapping(uint256 => uint256) public totalUserInTiers;
-    // uint256 public totalUserInTier2;
-    // uint256 public totalUserInTier3;
-    // uint256 public totalUserInTier4;
-    // uint256 public totalUserInTier5;
-    // uint256 public totalUserInTier6;
-    // uint256 public totalUserInTier7;
-    // uint256 public totalUserInTier8;
-    // uint256 public totalUserInTier9;
 
     //max allocations per user in a tier
     // tier -> max_allocation_per_user
     mapping(uint256 => uint256) public maxAllocaPerUserTiers;
-    // uint256 public maxAllocaPerUserTier2;
-    // uint256 public maxAllocaPerUserTier3;
-    // uint256 public maxAllocaPerUserTier4;
-    // uint256 public maxAllocaPerUserTier5;
-    // uint256 public maxAllocaPerUserTier6;
-    // uint256 public maxAllocaPerUserTier7;
-    // uint256 public maxAllocaPerUserTier8;
-    // uint256 public maxAllocaPerUserTier9;
 
     //min allocation per user in a tier
     // tier -> min_allocation_per_user
     mapping(uint256 => uint256) public minAllocaPerUserTiers;
-    // uint256 public minAllocaPerUserTier1;
-    // uint256 public minAllocaPerUserTier2;
-    // uint256 public minAllocaPerUserTier3;
-    // uint256 public minAllocaPerUserTier4;
-    // uint256 public minAllocaPerUserTier5;
-    // uint256 public minAllocaPerUserTier6;
-    // uint256 public minAllocaPerUserTier7;
-    // uint256 public minAllocaPerUserTier8;
-    // uint256 public minAllocaPerUserTier9;
 
+    // whitelisted addresses
+    // tier -> list of address
     mapping(uint256 => address[]) private whitelistTiers;
-
-    // // address array for tier one whitelist
-    // address[] private whitelistTier1;
-
-    // // address array for tier two whitelist
-    // address[] private whitelistTier2;
-
-    // // address array for tier three whitelist
-    // address[] private whitelistTier3;
-
-    // // address array for tier Four whitelist
-    // address[] private whitelistTier4;
-
-    // // address array for tier three whitelist
-    // address[] private whitelistTier5;
-
-    // // address array for tier three whitelist
-    // address[] private whitelistTier6;
-
-    // // address array for tier three whitelist
-    // address[] private whitelistTier7;
-
-    // // address array for tier three whitelist
-    // address[] private whitelistTier8;
-
-    // // address array for tier three whitelist
-    // address[] private whitelistTier9;
 
     IERC20 public immutable ERC20Interface;
     // address public immutable tokenAddress;
@@ -121,14 +55,6 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
     //mapping the user purchase per tier
     // user -> tier -> amount
     mapping(address => mapping(uint256 => uint256)) public buyInTiers;
-    // mapping(address => uint256) public buyInTier2;
-    // mapping(address => uint256) public buyInTier3;
-    // mapping(address => uint256) public buyInTier4;
-    // mapping(address => uint256) public buyInTier5;
-    // mapping(address => uint256) public buyInTier6;
-    // mapping(address => uint256) public buyInTier7;
-    // mapping(address => uint256) public buyInTier8;
-    // mapping(address => uint256) public buyInTier9;
 
     // NOTE: Here, this `struct` could be used like `mapping(address => RefundVault[]) refundInTier1`
     // But, then the `claimRefund` function would be costly as array costs more than mapping in terms of gas during iteration.
@@ -309,60 +235,6 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
         whitelistTiers[_tier].push(_address);
     }
 
-    // //add the address in Whitelist tier One to invest
-    // function addWhitelist1(address _address) external onlyOwner whenNotPaused {
-    //     require(_address != address(0), "Invalid address");
-    //     whitelistTier1.push(_address);
-    // }
-
-    // //add the address in Whitelist tier two to invest
-    // function addWhitelist2(address _address) external onlyOwner whenNotPaused {
-    //     require(_address != address(0), "Invalid address");
-    //     whitelistTier2.push(_address);
-    // }
-
-    // //add the address in Whitelist tier three to invest
-    // function addWhitelist3(address _address) external onlyOwner whenNotPaused {
-    //     require(_address != address(0), "Invalid address");
-    //     whitelistTier3.push(_address);
-    // }
-
-    // //add the address in Whitelist tier Four to invest
-    // function addWhitelist4(address _address) external onlyOwner whenNotPaused {
-    //     require(_address != address(0), "Invalid address");
-    //     whitelistTier4.push(_address);
-    // }
-
-    // //add the address in Whitelist tier three to invest
-    // function addWhitelist5(address _address) external onlyOwner whenNotPaused {
-    //     require(_address != address(0), "Invalid address");
-    //     whitelistTier5.push(_address);
-    // }
-
-    // //add the address in Whitelist tier three to invest
-    // function addWhitelist6(address _address) external onlyOwner whenNotPaused {
-    //     require(_address != address(0), "Invalid address");
-    //     whitelistTier6.push(_address);
-    // }
-
-    // //add the address in Whitelist tier three to invest
-    // function addWhitelist7(address _address) external onlyOwner whenNotPaused {
-    //     require(_address != address(0), "Invalid address");
-    //     whitelistTier7.push(_address);
-    // }
-
-    // //add the address in Whitelist tier three to invest
-    // function addWhitelist8(address _address) external onlyOwner whenNotPaused {
-    //     require(_address != address(0), "Invalid address");
-    //     whitelistTier8.push(_address);
-    // }
-
-    // //add the address in Whitelist tier three to invest
-    // function addWhitelist9(address _address) external onlyOwner whenNotPaused {
-    //     require(_address != address(0), "Invalid address");
-    //     whitelistTier9.push(_address);
-    // }
-
     function getWhitelist(uint256 _tier, address _address)
         public
         view
@@ -378,123 +250,6 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
         }
         return false;
     }
-
-    // // check the address in whitelist tier one
-    // function getWhitelist1(address _address) public view returns (bool) {
-    //     uint256 i;
-    //     uint256 length = whitelistTier1.length;
-    //     for (i = 0; i < length; i++) {
-    //         address _addressArr = whitelistTier1[i];
-    //         if (_addressArr == _address) {
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
-
-    // // check the address in whitelist tier two
-    // function getWhitelist2(address _address) public view returns (bool) {
-    //     uint256 i;
-    //     uint256 length = whitelistTier2.length;
-    //     for (i = 0; i < length; i++) {
-    //         address _addressArr = whitelistTier2[i];
-    //         if (_addressArr == _address) {
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
-
-    // // check the address in whitelist tier three
-    // function getWhitelist3(address _address) public view returns (bool) {
-    //     uint256 i;
-    //     uint256 length = whitelistTier3.length;
-    //     for (i = 0; i < length; i++) {
-    //         address _addressArr = whitelistTier3[i];
-    //         if (_addressArr == _address) {
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
-
-    // // check the address in whitelist tier Four
-    // function getWhitelist4(address _address) public view returns (bool) {
-    //     uint256 i;
-    //     uint256 length = whitelistTier4.length;
-    //     for (i = 0; i < length; i++) {
-    //         address _addressArr = whitelistTier4[i];
-    //         if (_addressArr == _address) {
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
-
-    // // check the address in whitelist tier Five
-    // function getWhitelist5(address _address) public view returns (bool) {
-    //     uint256 i;
-    //     uint256 length = whitelistTier5.length;
-    //     for (i = 0; i < length; i++) {
-    //         address _addressArr = whitelistTier5[i];
-    //         if (_addressArr == _address) {
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
-
-    // // check the address in whitelist tier Six
-    // function getWhitelist6(address _address) public view returns (bool) {
-    //     uint256 i;
-    //     uint256 length = whitelistTier6.length;
-    //     for (i = 0; i < length; i++) {
-    //         address _addressArr = whitelistTier6[i];
-    //         if (_addressArr == _address) {
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
-
-    // // check the address in whitelist tier Seven
-    // function getWhitelist7(address _address) public view returns (bool) {
-    //     uint256 i;
-    //     uint256 length = whitelistTier7.length;
-    //     for (i = 0; i < length; i++) {
-    //         address _addressArr = whitelistTier7[i];
-    //         if (_addressArr == _address) {
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
-
-    // // check the address in whitelist tier Eight
-    // function getWhitelist8(address _address) public view returns (bool) {
-    //     uint256 i;
-    //     uint256 length = whitelistTier8.length;
-    //     for (i = 0; i < length; i++) {
-    //         address _addressArr = whitelistTier8[i];
-    //         if (_addressArr == _address) {
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
-
-    // // check the address in whitelist tier Nine
-    // function getWhitelist9(address _address) public view returns (bool) {
-    //     uint256 i;
-    //     uint256 length = whitelistTier9.length;
-    //     for (i = 0; i < length; i++) {
-    //         address _addressArr = whitelistTier9[i];
-    //         if (_addressArr == _address) {
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
 
     modifier _hasAllowance(address allower, uint256 amount) {
         // Make sure the allower has provided the right allowance.
