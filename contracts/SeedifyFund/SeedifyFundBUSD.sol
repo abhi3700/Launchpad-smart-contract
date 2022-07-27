@@ -64,7 +64,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
     // }
 
     uint32 private constant refundDuration = 86400; // 24hr
-    uint32 private listingTimestamp;
+    uint32 private listingTimestamp; // listing timestamp is taken for a
 
     // refund amount per user in each tier
     // buyer -> tier -> refund_amount
@@ -80,7 +80,12 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
     //     private refundTstampsInTiers;
 
     // EVENTS
-    // TODO: add `TokenBought`
+    event TokenBought(
+        address indexed buyer,
+        uint256 indexed tier,
+        uint256 indexed boughtTimestamp,
+        uint256 buyAmt
+    );
     event RefundClaimed(
         address indexed buyer,
         uint256 indexed tier,
@@ -264,17 +269,17 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
         return false;
     }
 
-    modifier _hasAllowance(address allower, uint256 amount) {
+    modifier _hasAllowance(address allower, uint256 _amount) {
         // Make sure the allower has provided the right allowance.
         // ERC20Interface = IERC20(tokenAddress);
         uint256 ourAllowance = ERC20Interface.allowance(allower, address(this));
-        require(amount <= ourAllowance, "Make sure to add enough allowance");
+        require(_amount <= ourAllowance, "Make sure to add enough allowance");
         _;
     }
 
-    function buyTokens(uint256 amount)
+    function buyTokens(uint256 _amount)
         external
-        _hasAllowance(msg.sender, amount)
+        _hasAllowance(msg.sender, _amount)
         nonReentrant
         whenNotPaused
         returns (bool)
@@ -284,16 +289,17 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             "buyTokens: The sale is either not yet started or is closed now"
         );
         require(
-            totalBUSDReceivedInAllTiers + amount <= maxCap,
+            totalBUSDReceivedInAllTiers + _amount <= maxCap,
             "buyTokens: purchase would exceed max cap"
         );
 
-        uint256 _amountBoughtUser = 0;
+        uint256 _amountBoughtUser;
         uint256 _totalBUSDinTier;
         address _projOwner = projectOwner;
+        uint256 _tier;
 
         if (getWhitelist(1, msg.sender)) {
-            // read the amount bought by user
+            // read the _amount bought by user
             _amountBoughtUser = buyInTiers[msg.sender][1];
             _totalBUSDinTier = totalBUSDInTiers[1];
             require(
@@ -301,7 +307,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
                 "buyTokens: your purchasing power is below min. cap"
             );
             require(
-                _totalBUSDinTier + amount <= tierMaxCaps[1],
+                _totalBUSDinTier + _amount <= tierMaxCaps[1],
                 "buyTokens: purchase would exceed Tier one max cap"
             );
             require(
@@ -309,10 +315,12 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
                 "buyTokens:You are investing more than your tier-1 limit!"
             );
 
-            buyInTiers[msg.sender][1] += amount;
-            totalBUSDReceivedInAllTiers += amount;
-            totalBUSDInTiers[1] += amount;
-            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
+            _tier = 1;
+            buyInTiers[msg.sender][1] += _amount;
+            totalBUSDReceivedInAllTiers += _amount;
+            totalBUSDInTiers[1] += _amount;
+            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
+            emit TokenBought(msg.sender, _tier, block.timestamp, _amount);
         } else if (getWhitelist(2, msg.sender)) {
             // read the amount bought by user
             _amountBoughtUser = buyInTiers[msg.sender][2];
@@ -322,7 +330,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
                 "buyTokens: your purchasing power is below min. cap"
             );
             require(
-                _totalBUSDinTier + amount <= tierMaxCaps[2],
+                _totalBUSDinTier + _amount <= tierMaxCaps[2],
                 "buyTokens: purchase would exceed Tier two max cap"
             );
             require(
@@ -330,10 +338,12 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
                 "buyTokens:You are investing more than your tier-2 limit!"
             );
 
-            buyInTiers[msg.sender][2] += amount;
-            totalBUSDReceivedInAllTiers += amount;
-            totalBUSDInTiers[2] += amount;
-            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
+            _tier = 2;
+            buyInTiers[msg.sender][2] += _amount;
+            totalBUSDReceivedInAllTiers += _amount;
+            totalBUSDInTiers[2] += _amount;
+            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
+            emit TokenBought(msg.sender, _tier, block.timestamp, _amount);
         } else if (getWhitelist(3, msg.sender)) {
             // read the amount bought by user
             _amountBoughtUser = buyInTiers[msg.sender][3];
@@ -343,7 +353,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
                 "buyTokens: your purchasing power is below min. cap"
             );
             require(
-                _totalBUSDinTier + amount <= tierMaxCaps[3],
+                _totalBUSDinTier + _amount <= tierMaxCaps[3],
                 "buyTokens: purchase would exceed Tier three max cap"
             );
             require(
@@ -351,10 +361,12 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
                 "buyTokens:You are investing more than your tier-3 limit!"
             );
 
-            buyInTiers[msg.sender][3] += amount;
-            totalBUSDReceivedInAllTiers += amount;
-            totalBUSDInTiers[3] += amount;
-            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
+            _tier = 3;
+            buyInTiers[msg.sender][3] += _amount;
+            totalBUSDReceivedInAllTiers += _amount;
+            totalBUSDInTiers[3] += _amount;
+            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
+            emit TokenBought(msg.sender, _tier, block.timestamp, _amount);
         } else if (getWhitelist(4, msg.sender)) {
             // read the amount bought by user
             _amountBoughtUser = buyInTiers[msg.sender][4];
@@ -364,7 +376,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
                 "buyTokens: your purchasing power is below min. cap"
             );
             require(
-                _totalBUSDinTier + amount <= tierMaxCaps[4],
+                _totalBUSDinTier + _amount <= tierMaxCaps[4],
                 "buyTokens: purchase would exceed Tier four max cap"
             );
             require(
@@ -372,10 +384,12 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
                 "buyTokens:You are investing more than your tier-4 limit!"
             );
 
-            buyInTiers[msg.sender][4] += amount;
-            totalBUSDReceivedInAllTiers += amount;
-            totalBUSDInTiers[4] += amount;
-            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
+            _tier = 4;
+            buyInTiers[msg.sender][4] += _amount;
+            totalBUSDReceivedInAllTiers += _amount;
+            totalBUSDInTiers[4] += _amount;
+            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
+            emit TokenBought(msg.sender, _tier, block.timestamp, _amount);
         } else if (getWhitelist(5, msg.sender)) {
             // read the amount bought by user
             _amountBoughtUser = buyInTiers[msg.sender][5];
@@ -385,7 +399,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
                 "buyTokens: your purchasing power is below min. cap"
             );
             require(
-                _totalBUSDinTier + amount <= tierMaxCaps[5],
+                _totalBUSDinTier + _amount <= tierMaxCaps[5],
                 "buyTokens: purchase would exceed Tier five max cap"
             );
             require(
@@ -393,10 +407,12 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
                 "buyTokens:You are investing more than your tier-5 limit!"
             );
 
-            buyInTiers[msg.sender][5] += amount;
-            totalBUSDReceivedInAllTiers += amount;
-            totalBUSDInTiers[5] += amount;
-            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
+            _tier = 5;
+            buyInTiers[msg.sender][5] += _amount;
+            totalBUSDReceivedInAllTiers += _amount;
+            totalBUSDInTiers[5] += _amount;
+            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
+            emit TokenBought(msg.sender, _tier, block.timestamp, _amount);
         } else if (getWhitelist(6, msg.sender)) {
             // read the amount bought by user
             _amountBoughtUser = buyInTiers[msg.sender][6];
@@ -406,7 +422,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
                 "buyTokens: your purchasing power is below min. cap"
             );
             require(
-                _totalBUSDinTier + amount <= tierMaxCaps[6],
+                _totalBUSDinTier + _amount <= tierMaxCaps[6],
                 "buyTokens: purchase would exceed Tier six max cap"
             );
             require(
@@ -414,10 +430,12 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
                 "buyTokens:You are investing more than your tier-6 limit!"
             );
 
-            buyInTiers[msg.sender][6] += amount;
-            totalBUSDReceivedInAllTiers += amount;
-            totalBUSDInTiers[6] += amount;
-            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
+            _tier = 6;
+            buyInTiers[msg.sender][6] += _amount;
+            totalBUSDReceivedInAllTiers += _amount;
+            totalBUSDInTiers[6] += _amount;
+            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
+            emit TokenBought(msg.sender, _tier, block.timestamp, _amount);
         } else if (getWhitelist(7, msg.sender)) {
             // read the amount bought by user
             _amountBoughtUser = buyInTiers[msg.sender][7];
@@ -427,7 +445,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
                 "buyTokens: your purchasing power is below min. cap"
             );
             require(
-                _totalBUSDinTier + amount <= tierMaxCaps[7],
+                _totalBUSDinTier + _amount <= tierMaxCaps[7],
                 "buyTokens: purchase would exceed Tier seven max cap"
             );
             require(
@@ -435,10 +453,12 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
                 "buyTokens:You are investing more than your tier-7 limit!"
             );
 
-            buyInTiers[msg.sender][7] += amount;
-            totalBUSDReceivedInAllTiers += amount;
-            totalBUSDInTiers[7] += amount;
-            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
+            _tier = 7;
+            buyInTiers[msg.sender][7] += _amount;
+            totalBUSDReceivedInAllTiers += _amount;
+            totalBUSDInTiers[7] += _amount;
+            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
+            emit TokenBought(msg.sender, _tier, block.timestamp, _amount);
         } else if (getWhitelist(8, msg.sender)) {
             // read the amount bought by user
             _amountBoughtUser = buyInTiers[msg.sender][8];
@@ -448,7 +468,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
                 "buyTokens: your purchasing power is below min. cap"
             );
             require(
-                _totalBUSDinTier + amount <= tierMaxCaps[8],
+                _totalBUSDinTier + _amount <= tierMaxCaps[8],
                 "buyTokens: purchase would exceed Tier eight max cap"
             );
             require(
@@ -456,10 +476,12 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
                 "buyTokens:You are investing more than your tier-8 limit!"
             );
 
-            buyInTiers[msg.sender][8] += amount;
-            totalBUSDReceivedInAllTiers += amount;
-            totalBUSDInTiers[8] += amount;
-            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
+            _tier = 8;
+            buyInTiers[msg.sender][8] += _amount;
+            totalBUSDReceivedInAllTiers += _amount;
+            totalBUSDInTiers[8] += _amount;
+            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
+            emit TokenBought(msg.sender, _tier, block.timestamp, _amount);
         } else if (getWhitelist(9, msg.sender)) {
             // read the amount bought by user
             _amountBoughtUser = buyInTiers[msg.sender][9];
@@ -469,7 +491,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
                 "buyTokens: your purchasing power is below min. cap"
             );
             require(
-                _totalBUSDinTier + amount <= tierMaxCaps[9],
+                _totalBUSDinTier + _amount <= tierMaxCaps[9],
                 "buyTokens: purchase would exceed Tier nine max cap"
             );
             require(
@@ -477,10 +499,12 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
                 "buyTokens:You are investing more than your tier-9 limit!"
             );
 
-            buyInTiers[msg.sender][9] += amount;
-            totalBUSDReceivedInAllTiers += amount;
-            totalBUSDInTiers[9] += amount;
-            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, amount); //changes to transfer BUSD to owner
+            _tier = 9;
+            buyInTiers[msg.sender][9] += _amount;
+            totalBUSDReceivedInAllTiers += _amount;
+            totalBUSDInTiers[9] += _amount;
+            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
+            emit TokenBought(msg.sender, _tier, block.timestamp, _amount);
         } else {
             revert("Not whitelisted");
         }
