@@ -8,14 +8,14 @@ pragma solidity 0.6.12;
 // SPDX-License-Identifier: UNLICENSED
 
 import "../ERC20/IERC20.sol";
-import "../Ownable/Context.sol";
 import "../Ownable/Ownable.sol";
+import "../Pausable/Pausable.sol";
 import "../ERC20/SafeERC20.sol";
 import "../dependencies/ReentrancyGuard.sol";
 
 //SeedifyFundBUSD
 
-contract SeedifyFundBUSD is Ownable, ReentrancyGuard {
+contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     //token attributes
@@ -182,7 +182,7 @@ contract SeedifyFundBUSD is Ownable, ReentrancyGuard {
         uint256 _totalparticipants,
         address _tokenAddress,
         uint32 _listingTimestamp
-    ) public {
+    ) public Ownable() Pausable() {
         maxCap = _maxCap;
         saleStartTime = _saleStartTime;
         saleEndTime = _saleEndTime;
@@ -245,7 +245,7 @@ contract SeedifyFundBUSD is Ownable, ReentrancyGuard {
         uint256 _tier7Value,
         uint256 _tier8Value,
         uint256 _tier9Value
-    ) external onlyOwner {
+    ) external onlyOwner whenNotPaused {
         tierMaxCap1 = _tier1Value;
         tierMaxCap2 = _tier2Value;
         tierMaxCap3 = _tier3Value;
@@ -278,7 +278,7 @@ contract SeedifyFundBUSD is Ownable, ReentrancyGuard {
         uint256 _tierSevenUsersValue,
         uint256 _tierEightUsersValue,
         uint256 _tierNineUsersValue
-    ) external onlyOwner {
+    ) external onlyOwner whenNotPaused {
         totalUserInTier1 = _tierOneUsersValue;
         totalUserInTier2 = _tierTwoUsersValue;
         totalUserInTier3 = _tierThreeUsersValue;
@@ -301,55 +301,55 @@ contract SeedifyFundBUSD is Ownable, ReentrancyGuard {
     }
 
     //add the address in Whitelist tier One to invest
-    function addWhitelist1(address _address) external onlyOwner {
+    function addWhitelist1(address _address) external onlyOwner whenNotPaused {
         require(_address != address(0), "Invalid address");
         whitelistTier1.push(_address);
     }
 
     //add the address in Whitelist tier two to invest
-    function addWhitelist2(address _address) external onlyOwner {
+    function addWhitelist2(address _address) external onlyOwner whenNotPaused {
         require(_address != address(0), "Invalid address");
         whitelistTier2.push(_address);
     }
 
     //add the address in Whitelist tier three to invest
-    function addWhitelist3(address _address) external onlyOwner {
+    function addWhitelist3(address _address) external onlyOwner whenNotPaused {
         require(_address != address(0), "Invalid address");
         whitelistTier3.push(_address);
     }
 
     //add the address in Whitelist tier Four to invest
-    function addWhitelist4(address _address) external onlyOwner {
+    function addWhitelist4(address _address) external onlyOwner whenNotPaused {
         require(_address != address(0), "Invalid address");
         whitelistTier4.push(_address);
     }
 
     //add the address in Whitelist tier three to invest
-    function addWhitelist5(address _address) external onlyOwner {
+    function addWhitelist5(address _address) external onlyOwner whenNotPaused {
         require(_address != address(0), "Invalid address");
         whitelistTier5.push(_address);
     }
 
     //add the address in Whitelist tier three to invest
-    function addWhitelist6(address _address) external onlyOwner {
+    function addWhitelist6(address _address) external onlyOwner whenNotPaused {
         require(_address != address(0), "Invalid address");
         whitelistTier6.push(_address);
     }
 
     //add the address in Whitelist tier three to invest
-    function addWhitelist7(address _address) external onlyOwner {
+    function addWhitelist7(address _address) external onlyOwner whenNotPaused {
         require(_address != address(0), "Invalid address");
         whitelistTier7.push(_address);
     }
 
     //add the address in Whitelist tier three to invest
-    function addWhitelist8(address _address) external onlyOwner {
+    function addWhitelist8(address _address) external onlyOwner whenNotPaused {
         require(_address != address(0), "Invalid address");
         whitelistTier8.push(_address);
     }
 
     //add the address in Whitelist tier three to invest
-    function addWhitelist9(address _address) external onlyOwner {
+    function addWhitelist9(address _address) external onlyOwner whenNotPaused {
         require(_address != address(0), "Invalid address");
         whitelistTier9.push(_address);
     }
@@ -483,6 +483,7 @@ contract SeedifyFundBUSD is Ownable, ReentrancyGuard {
         external
         _hasAllowance(msg.sender, amount)
         nonReentrant
+        whenNotPaused
         returns (bool)
     {
         require(
@@ -697,7 +698,12 @@ contract SeedifyFundBUSD is Ownable, ReentrancyGuard {
         listingTimestamp = _listingTstamp;
     }
 
-    function claimRefund(uint256 _amount) external nonReentrant returns (bool) {
+    function claimRefund(uint256 _amount)
+        external
+        nonReentrant
+        whenNotPaused
+        returns (bool)
+    {
         require(
             block.timestamp - listingTimestamp <= refundDuration,
             "claimRefund: time limit exceeded"
