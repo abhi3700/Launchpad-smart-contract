@@ -48,7 +48,8 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
     // tier -> list of address
     mapping(uint256 => address[]) private whitelistTiers;
 
-    IERC20 public immutable ERC20Interface;
+    // IGO token interface
+    IERC20 public immutable tokenInterface;
     // address public immutable tokenAddress;
 
     //mapping the user purchase per tier
@@ -63,7 +64,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
     //     uint256 buyTimestamp;
     // }
 
-    uint32 private constant refundDuration = 86400; // 24hr
+    uint32 private constant REFUND_DURATION = 86400; // 24hr
     uint32 private listingTimestamp; // listing timestamp is taken for a
 
     // refund amount per user in each tier
@@ -166,7 +167,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
 
         require(_tokenAddress != address(0), "Zero token address"); //Adding token to the contract
         // tokenAddress = _tokenAddress;
-        ERC20Interface = IERC20(_tokenAddress);
+        tokenInterface = IERC20(_tokenAddress);
         listingTimestamp = _listingTimestamp;
     }
 
@@ -271,8 +272,8 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
 
     modifier _hasAllowance(address allower, uint256 _amount) {
         // Make sure the allower has provided the right allowance.
-        // ERC20Interface = IERC20(tokenAddress);
-        uint256 ourAllowance = ERC20Interface.allowance(allower, address(this));
+        // tokenInterface = IERC20(tokenAddress);
+        uint256 ourAllowance = tokenInterface.allowance(allower, address(this));
         require(_amount <= ourAllowance, "Make sure to add enough allowance");
         _;
     }
@@ -319,7 +320,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             buyInTiers[msg.sender][1] += _amount;
             totalBUSDReceivedInAllTiers += _amount;
             totalBUSDInTiers[1] += _amount;
-            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
+            tokenInterface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
             emit TokenBought(msg.sender, _tier, block.timestamp, _amount);
         } else if (getWhitelist(2, msg.sender)) {
             // read the amount bought by user
@@ -342,7 +343,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             buyInTiers[msg.sender][2] += _amount;
             totalBUSDReceivedInAllTiers += _amount;
             totalBUSDInTiers[2] += _amount;
-            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
+            tokenInterface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
             emit TokenBought(msg.sender, _tier, block.timestamp, _amount);
         } else if (getWhitelist(3, msg.sender)) {
             // read the amount bought by user
@@ -365,7 +366,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             buyInTiers[msg.sender][3] += _amount;
             totalBUSDReceivedInAllTiers += _amount;
             totalBUSDInTiers[3] += _amount;
-            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
+            tokenInterface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
             emit TokenBought(msg.sender, _tier, block.timestamp, _amount);
         } else if (getWhitelist(4, msg.sender)) {
             // read the amount bought by user
@@ -388,7 +389,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             buyInTiers[msg.sender][4] += _amount;
             totalBUSDReceivedInAllTiers += _amount;
             totalBUSDInTiers[4] += _amount;
-            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
+            tokenInterface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
             emit TokenBought(msg.sender, _tier, block.timestamp, _amount);
         } else if (getWhitelist(5, msg.sender)) {
             // read the amount bought by user
@@ -411,7 +412,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             buyInTiers[msg.sender][5] += _amount;
             totalBUSDReceivedInAllTiers += _amount;
             totalBUSDInTiers[5] += _amount;
-            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
+            tokenInterface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
             emit TokenBought(msg.sender, _tier, block.timestamp, _amount);
         } else if (getWhitelist(6, msg.sender)) {
             // read the amount bought by user
@@ -434,7 +435,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             buyInTiers[msg.sender][6] += _amount;
             totalBUSDReceivedInAllTiers += _amount;
             totalBUSDInTiers[6] += _amount;
-            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
+            tokenInterface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
             emit TokenBought(msg.sender, _tier, block.timestamp, _amount);
         } else if (getWhitelist(7, msg.sender)) {
             // read the amount bought by user
@@ -457,7 +458,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             buyInTiers[msg.sender][7] += _amount;
             totalBUSDReceivedInAllTiers += _amount;
             totalBUSDInTiers[7] += _amount;
-            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
+            tokenInterface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
             emit TokenBought(msg.sender, _tier, block.timestamp, _amount);
         } else if (getWhitelist(8, msg.sender)) {
             // read the amount bought by user
@@ -480,7 +481,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             buyInTiers[msg.sender][8] += _amount;
             totalBUSDReceivedInAllTiers += _amount;
             totalBUSDInTiers[8] += _amount;
-            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
+            tokenInterface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
             emit TokenBought(msg.sender, _tier, block.timestamp, _amount);
         } else if (getWhitelist(9, msg.sender)) {
             // read the amount bought by user
@@ -503,7 +504,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             buyInTiers[msg.sender][9] += _amount;
             totalBUSDReceivedInAllTiers += _amount;
             totalBUSDInTiers[9] += _amount;
-            ERC20Interface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
+            tokenInterface.safeTransferFrom(msg.sender, _projOwner, _amount); //changes to transfer BUSD to owner
             emit TokenBought(msg.sender, _tier, block.timestamp, _amount);
         } else {
             revert("Not whitelisted");
@@ -523,7 +524,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
         returns (bool)
     {
         require(
-            block.timestamp - listingTimestamp <= refundDuration,
+            block.timestamp - listingTimestamp <= REFUND_DURATION,
             "claimRefund: time limit exceeded"
         );
 
@@ -552,7 +553,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             emit RefundClaimed(msg.sender, 1, block.timestamp, _amount);
 
             // refund the bought amount
-            ERC20Interface.safeTransfer(msg.sender, _amount);
+            tokenInterface.safeTransfer(msg.sender, _amount);
         } else if (getWhitelist(2, msg.sender)) {
             uint256 _boughtAmt = buyInTiers[msg.sender][2];
 
@@ -578,7 +579,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             emit RefundClaimed(msg.sender, 2, block.timestamp, _amount);
 
             // refund the bought amount
-            ERC20Interface.safeTransfer(msg.sender, _amount);
+            tokenInterface.safeTransfer(msg.sender, _amount);
         } else if (getWhitelist(3, msg.sender)) {
             uint256 _boughtAmt = buyInTiers[msg.sender][3];
 
@@ -604,7 +605,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             emit RefundClaimed(msg.sender, 3, block.timestamp, _amount);
 
             // refund the bought amount
-            ERC20Interface.safeTransfer(msg.sender, _amount);
+            tokenInterface.safeTransfer(msg.sender, _amount);
         } else if (getWhitelist(4, msg.sender)) {
             uint256 _boughtAmt = buyInTiers[msg.sender][4];
 
@@ -630,7 +631,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             emit RefundClaimed(msg.sender, 4, block.timestamp, _amount);
 
             // refund the bought amount
-            ERC20Interface.safeTransfer(msg.sender, _amount);
+            tokenInterface.safeTransfer(msg.sender, _amount);
         } else if (getWhitelist(5, msg.sender)) {
             uint256 _boughtAmt = buyInTiers[msg.sender][5];
 
@@ -656,7 +657,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             emit RefundClaimed(msg.sender, 5, block.timestamp, _amount);
 
             // refund the bought amount
-            ERC20Interface.safeTransfer(msg.sender, _amount);
+            tokenInterface.safeTransfer(msg.sender, _amount);
         } else if (getWhitelist(6, msg.sender)) {
             uint256 _boughtAmt = buyInTiers[msg.sender][6];
 
@@ -682,7 +683,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             emit RefundClaimed(msg.sender, 6, block.timestamp, _amount);
 
             // refund the bought amount
-            ERC20Interface.safeTransfer(msg.sender, _amount);
+            tokenInterface.safeTransfer(msg.sender, _amount);
         } else if (getWhitelist(7, msg.sender)) {
             uint256 _boughtAmt = buyInTiers[msg.sender][7];
 
@@ -708,7 +709,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             emit RefundClaimed(msg.sender, 7, block.timestamp, _amount);
 
             // refund the bought amount
-            ERC20Interface.safeTransfer(msg.sender, _amount);
+            tokenInterface.safeTransfer(msg.sender, _amount);
         } else if (getWhitelist(8, msg.sender)) {
             uint256 _boughtAmt = buyInTiers[msg.sender][8];
 
@@ -734,7 +735,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             emit RefundClaimed(msg.sender, 8, block.timestamp, _amount);
 
             // refund the bought amount
-            ERC20Interface.safeTransfer(msg.sender, _amount);
+            tokenInterface.safeTransfer(msg.sender, _amount);
         } else if (getWhitelist(9, msg.sender)) {
             uint256 _boughtAmt = buyInTiers[msg.sender][9];
 
@@ -760,7 +761,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
             emit RefundClaimed(msg.sender, 9, block.timestamp, _amount);
 
             // refund the bought amount
-            ERC20Interface.safeTransfer(msg.sender, _amount);
+            tokenInterface.safeTransfer(msg.sender, _amount);
         } else {
             revert("Not whitelisted");
         }

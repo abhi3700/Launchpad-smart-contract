@@ -10,7 +10,7 @@ library SafeERC20 {
         address to,
         uint256 value
     ) internal {
-        require(token.transfer(to, value));
+        require(token.transfer(to, value), "transfer failed");
     }
 
     function safeTransferFrom(
@@ -19,7 +19,7 @@ library SafeERC20 {
         address to,
         uint256 value
     ) internal {
-        require(token.transferFrom(from, to, value));
+        require(token.transferFrom(from, to, value), "transferFrom failed");
     }
 
     function safeApprove(
@@ -27,6 +27,6 @@ library SafeERC20 {
         address spender,
         uint256 value
     ) internal {
-        require(token.approve(spender, value));
+        require(token.approve(spender, value), "safeApprove failed");
     }
 }
