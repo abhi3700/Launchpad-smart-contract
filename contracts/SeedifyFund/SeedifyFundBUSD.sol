@@ -1,21 +1,19 @@
-/*
- *Seedify.fund
- *Decentralized Incubator
- *A disruptive blockchain incubator program / decentralized seed stage fund, empowered through DAO based community-involvement mechanisms
- */
+// SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
 
-// SPDX-License-Identifier: MIT
-
-import "../ERC20/IERC20.sol";
+import "../ERC20/IERC20Metadata.sol";
 import "../Ownable/Ownable.sol";
 import "../Pausable/Pausable.sol";
 import "../ERC20/SafeERC20.sol";
 import "../dependencies/ReentrancyGuard.sol";
 
-//SeedifyFundBUSD
+/**
+ * @title Seedify.fund IGO Launchpad
+ * Decentralized Incubator
+ * A disruptive blockchain incubator program / decentralized seed stage fund, empowered through DAO based community-involvement mechanisms
+ */
 contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
-    using SafeERC20 for IERC20;
+    using SafeERC20 for IERC20Metadata;
 
     //token attributes
     string public constant NAME = "Seedify.funds.BUSD"; //name of the contract
@@ -49,7 +47,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
     mapping(uint256 => address[]) private whitelistTiers;
 
     // IGO token interface
-    IERC20 public immutable tokenInterface;
+    IERC20Metadata public immutable tokenInterface;
     // address public immutable tokenAddress;
 
     //mapping the user purchase per tier
@@ -167,7 +165,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
 
         require(_tokenAddress != address(0), "Zero token address"); //Adding token to the contract
         // tokenAddress = _tokenAddress;
-        tokenInterface = IERC20(_tokenAddress);
+        tokenInterface = IERC20Metadata(_tokenAddress);
         listingTimestamp = _listingTimestamp;
     }
 
@@ -272,7 +270,7 @@ contract SeedifyFundBUSD is Ownable, Pausable, ReentrancyGuard {
 
     modifier _hasAllowance(address allower, uint256 _amount) {
         // Make sure the allower has provided the right allowance.
-        // tokenInterface = IERC20(tokenAddress);
+        // tokenInterface = IERC20Metadata(tokenAddress);
         uint256 ourAllowance = tokenInterface.allowance(allower, address(this));
         require(_amount <= ourAllowance, "Make sure to add enough allowance");
         _;

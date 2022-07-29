@@ -1,9 +1,10 @@
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.6.0 <0.8.0;
-
-// SPDX-License-Identifier: UNLICENSED
-
 import "./IERC20.sol";
 
+/**
+ * @dev library for safe functions of ERC20 token
+ */
 library SafeERC20 {
     function safeTransfer(
         IERC20 token,
